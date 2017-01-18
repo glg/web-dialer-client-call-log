@@ -1,0 +1,32 @@
+<!doctype html>
+
+<html>
+  <head>
+    <title>call-log</title>
+    <script src="http://localhost:35729/livereload.js"></script>
+    <link rel="import" href="node_modules/polymer/polymer.html">
+    <link rel="import" href="src/call-log.html">
+
+    <style>
+      body {
+        font-family: "Helvetica Neue", "Helvetica", Arial;
+      }
+    </style>
+  </head>
+  <body unresolved>
+    <div id ="holder">
+      <call-log id="call-log"
+        numberDialed="555"
+        projectType="event"
+        sfdcProjectId="0000000000,0000000000"
+        vegaProjectId="111"
+        origin="demo"
+        originUrl="mylocalhost"
+        owner="0000000000"
+        ownerEmail=""
+        sfApiServer=""
+        emailTemplateServer=""
+        contactsJSON='[{"id":0000000000,"clientId":0000000000,"salesforceId":"0000000000","phoneE164":"+0000000000","homePhoneE164":null,"mobileE164":null,"firstName":"","lastName":"","email":"foo1@foo1.com","name":"","clientName":"","clientSalesforceId":"0000000000","logInd":true}]'></call-log>
+    </div>
+  </body>
+</html>

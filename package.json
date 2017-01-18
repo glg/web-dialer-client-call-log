@@ -1,0 +1,19 @@
+{
+  "name": "call-log",
+  "version": "0.0.0",
+  "dependencies": {
+    "moment": "~2.6.0",
+    "polymer": "git://github.com/custom-elements/polymer#master",
+    "polymer-build": "*",
+    "semantic-ui": "^0.19.3",
+    "ui-fonts": "git://github.com/custom-elements/ui-fonts#master",
+    "ui-styles": "git://github.com/custom-elements/ui-styles#master",
+    "core-ajax-npm": "git+ssh://git@github.com/custom-elements/core-ajax-npm.git#master",
+    "ui-toolkit": "0.0.21",
+    "underscore": "1.7.0"
+  },
+  "license": "ISC",
+  "scripts": {
+    "test": "polymer-build watch . src/ build/"
+  }
+}

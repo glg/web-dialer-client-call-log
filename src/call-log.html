@@ -1,0 +1,170 @@
+<link rel="import" href="../node_modules/ui-toolkit/build/ui-extension-toolkit.html">
+<link rel="stylesheet" type="text/css" href="./my-semantic-icons.less">
+<polymer-element name="call-log" attributes="selections contactsJSON numberDialed projectType sfdcProjectId origin originUrl owner ownerEmail sfApiServer emailTemplateServer">
+    <template>
+        <link rel="stylesheet" type="text/css" href="./call-log.less">
+        <form unresolved class="ui form {{errors.length ? 'error' : ''}} segment" id="callLogContainer">
+            <a on-click="{{close}}" title="close"><i class="close icon" style="float:right;"></i></a>
+            <h1 class="ui huge header">
+                <!-- I should probably pull this up above the form for a few reasons, not urgent. -->
+                <i class="glg-red circular inverted phone icon"></i>How was your call?
+            </h1>
+            <div class="field">
+                <h3 class="ui tiny header">Subject</h3>
+                <input id="subject" maxlength="255" type="text" value={{subject}}></input>
+            </div>
+            <template if="{{contacts.length}}">
+                <div class="field radio-selection">
+                    <h3 class="ui tiny header">Contact</h3>
+                    <template repeat="{{c in contacts}}">
+                        <label for="{{c.salesforceId}}" class="selection-label"/>
+                        <input id="{{c.salesforceId}}" name="contact" style="margin-right: 2px;" type="checkbox" value="{{c.salesforceId}}" on-click="{{selectContact}}"></input>
+                        {{c.name}}
+                        <ui-tooltip>
+                            <i class="info icon"></i>
+                            <div tip>
+                                <!-- TODO: Make this a CLIENT icon for some context -->
+                                <h4 class="ui large header"><i class="user icon"></i>{{c.name}}</h4>
+                                <div class="attribute"><i class="building icon"></i>{{c.clientName}}</div>
+                                <div class="attribute"><i class="mail icon"></i>{{c.email}}</div>
+                            </div>
+                        </ui-tooltip>
+                    </template>
+                </div>
+            </template>
+
+            <core-ajax auto id="ajaxProjects"
+                method="GET"
+                url="{{sfApiServer}}/api/project/sf/{{projectIdsCSV}}"
+                response="{{ajaxProjectsResponse}}"
+                on-core-error="{{ajaxProjectsError}}"
+                withCredentials="true"
+                handleAs="json">
+            </core-ajax>
+            <div id="associated-projects" class="field radio-selection">
+                <template if="{{projectIds.length > 0}}">
+                    <h3 class="ui tiny header">Associated Project</h3>
+                </template>
+                <template if="{{projectIds.length > 0 && !projects.length}}">
+                    <div class="ui segment">
+                        <div class="ui active inverted dimmer">
+                            <div class="ui text loader">Loading</div>
+                        </div>
+                    </div>
+                </template>
+                <template repeat="{{project in projects}}">
+                    <label for="{{project.Id}}" class="selection-label"/>
+                    <input id="{{project.Id}}" name="project" style="margin-right: 2px;" type="checkbox" value="{{project.Id}}" on-click="{{selectAssociatedProject}}"></input>
+                    {{project.Name}}
+                    <ui-tooltip>
+                        <i class="info icon"></i>
+                        <div tip class="project-tooltip">
+                                <!-- TODO: Fill this with MORE info! -->
+                                <template if="{{project.type == 'event'}}">
+                                    <h4 class="ui large header"><i class="calendar open icon"></i>{{project.Name}}</h4>
+                                </template>
+                                <template if="{{project.type == 'project'}}">
+                                    <h4 class="ui large header"><i class="folder open icon"></i>{{project.Name}}</h4> <!-- TODO: Find a better project icon! -->
+                                </template>
+                                <div class="attribute"><i class="building icon"></i>{{project.Account__r.Name}}</div>
+                                <div class="attribute"><i class="user icon"></i>{{project.Primary_RM__r.Name}}</div>
+                                <div class="attribute"><i class="mail icon"></i>{{project.Primary_RM__r.Email}}</div>
+                        </div>
+                    </ui-tooltip>
+                </template>
+            </div>
+
+            <core-ajax
+                auto
+                id="ajaxDescribe"
+                method="GET"
+                url="{{sfApiServer}}/api/describe/Task"
+                withCredentials="true"
+                handleAs="json">
+            </core-ajax>
+            <div class="field radio-selection" id="callTypes">
+                <h3 class="ui tiny header">Outcome</h3>
+                <template if="{{!selectionsLoaded}}">
+                    <div id="selectionsLoader" class="ui segment">
+                        <div class="ui active inverted dimmer">
+                            <div class="ui text loader">Loading</div>
+                        </div>
+                    </div>
+                </template>
+                <template repeat="{{s in selections}}">
+                    <label for="{{s.value}}" class="selection-label" />
+                    <input id="{{s.value}}" style="margin-right: 2px;" type="radio" name="callType" value="{{s.value}}" on-click="{{selectCallType}}"></input>
+                    {{s.label}}
+                </template>
+            </div>
+
+            <div id="descriptionField" class="field">
+                <textarea id="description" value="{{description}}"></textarea>
+            </div>
+
+            <core-ajax
+                auto
+                id="ajaxContactInfo"
+                method="GET"
+                withCredentials="true"
+                handleAs="json">
+            </core-ajax>
+            <template if="{{ccListToDisplay.length}}">
+                <div id="ccListToDisplay" class="field radio-selection">
+                    <h3 class="ui tiny header">CC Anyone?</h3>
+                    <template repeat="{{cc in ccListToDisplay}}">
+                        <label for="{{cc.id}}" class="selection-label" />
+                        <input id="{{cc.id}}" email="{{cc.email}}" style="margin-right: 2px;" type="checkbox" name="cc"></input>
+                        {{cc.name}}
+                        <ui-tooltip>
+                            <i class="info icon"></i>
+                            <div tip>
+                                <!-- TODO: Make this a GLG icon for some context (first verify it's all us) -->
+                                <h4 class="ui large header"><i class="user icon"></i>{{cc.name}}</h4>
+                                <i class="mail icon"></i>{{cc.email}}
+                                <h5 class="ui tiny header">
+                                    <i class="tags icon"></i>
+                                    Roles
+                                </h5>
+                                <ul id="roles">
+                                    <template repeat="{{r in cc.roles}}">
+                                        <li class="role">{{r}}</li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </ui-tooltip>
+                    </template>
+                </div>
+            </template>
+
+            <core-ajax
+                id="ajaxSubmit"
+                method="POST"
+                handleAs="json"
+                withCredentials="true"
+                url="{{sfApiServer}}/api/sf/Task"></core-ajax>
+            <core-ajax
+                id="ajaxCC"
+                method="POST"
+                handleAs="json"
+                contentType="application/json"
+                withCredentials="true"
+                url="{{emailTemplateServer}}/template/call_log_cc/smtp"></core-ajax>
+            <div class="field" style="margin-bottom: 0;">
+                <div class="ui fluid large glg-red submit icon button" on-click="{{submit}}">
+                    <i class="save icon"></i>
+                    Save
+                </div>
+            </div>
+            <div class="ui error message">
+                <ul class="list">
+                    <template repeat="{{error in errors}}">
+                        <li>{{error}}</li>
+                    </template>
+                </ul>
+            </div>
+        </form>
+    </template>
+
+    <script src="./call-log.litcoffee"></script>
+</polymer-element>

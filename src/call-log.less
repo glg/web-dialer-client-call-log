@@ -1,0 +1,69 @@
+@import "./my-semantic.less";
+
+:host {
+  font-size: 15px;
+  position: fixed;
+  bottom: 1em;
+  right: 1em;
+  z-index: 2147483647; /* Really high.  I always want this on top! */
+  width: 500px;
+  background-color: white;
+  box-shadow: 0 1px 5px 0px rgba(0,0,0,.325);
+  .ui.segment {
+    margin: 0;
+  }
+}
+
+h1 {
+  display: inline;
+  margin-left: 2px;
+}
+.ui.form {
+  textarea, .ui.textarea {
+    min-height: 80px;
+    height: 80px;
+  }
+  .field {
+    padding-top: 8px;
+    margin: 0;
+  }
+  input[type=checkbox]{
+    margin-top: 2px;
+  }
+}
+.radio-selection {
+  padding: 2px;
+}
+.selection-label {
+  width: 33.33%;
+  float: left;
+  display: inline;
+  line-height: 16px;
+}
+#selectionsLoader {
+  height: 98px;
+}
+.ui.tiny.header {
+  margin-bottom: 0.5em;
+}
+#associated-projects {
+    .dimmer {
+        height: 50px;
+    }
+    .selection-label {
+      width: 100%;
+    }
+}
+
+ui-tooltip {
+  li.role {
+    width: 50%;
+    float: left;
+    line-height: 20px;
+  }
+  .attribute {
+    line-height: 26px;
+  }
+}
+
+@import "./glg-semantic-overrides.less";
