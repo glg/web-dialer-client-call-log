@@ -1,5 +1,5 @@
 {
-  "name": "call-log",
+  "name": "web-dialer-client-call-log",
   "version": "0.0.0",
   "dependencies": {
     "moment": "~2.6.0",

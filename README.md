@@ -1,4 +1,4 @@
-#call-log
+#web-dialer-client-call-log
 The call-log widget is for use with the web-dialer chrome extension.
 
 After a call to a client or prospective client (not council members) the dialer will inject the call-log to the bottom of the page.
