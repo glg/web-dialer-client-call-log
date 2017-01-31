@@ -2,9 +2,9 @@
   "name": "web-dialer-client-call-log",
   "version": "0.0.0",
   "dependencies": {
-    "moment": "~2.6.0",
+    "moment": "2.6.0",
     "polymer": "git://github.com/custom-elements/polymer#master",
-    "polymer-build": "*",
+    "polymer-build": "0.6.0",
     "semantic-ui": "0.19.3",
     "ui-fonts": "git://github.com/custom-elements/ui-fonts#master",
     "ui-styles": "git://github.com/custom-elements/ui-styles#master",
