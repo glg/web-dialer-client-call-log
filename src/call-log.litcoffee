@@ -1,6 +1,22 @@
-#call-log
-The call-log gets injected by the web-dialer chrome extension after calls.
-Users log the outcome of their calls to salesforce tasks.
+# call-log
+The *call-log* gets injected by the web-dialer chrome extension after calls.
+Users log the outcome of their calls to *salesforce tasks*.
+
+## NOTE:
+Please note that the **Object.observe** method is no longer supported by chrome.
+Unfortunately the old Polymer used it.
+
+Attempts were made to find a working polyfill with little success.
+(Authors are not supporting it etc.)
+
+*Instead*, Old Polymer always had a `Polymer.flush()`, that is supposed to be called if no Object.observe() exists.
+I however am *not* seeing that behavior, *so* `Polymer.flush()` all the things!
+
+**When in doubt...`Polymer.flush()`!**
+
+*p.s.* I could have done some kind of **setInterval** 1/8th of a second *(Polymer claimed to do 1/10th of a second)*
+but performance concerns or zombie/memory isues with setInterval make it not worth the trouble IMO.
+**YOLO** `Polymer.flush()` everywhere!
 
     moment = require 'moment'
 
@@ -23,12 +39,14 @@ Attributes and Change Handlers
             @contacts = _.filter @contacts, (contact) ->
                 contact.logInd
             @reset()
+            Polymer.flush()
 
         sfdcProjectIdChanged: ()->
             if @sfdcProjectId is "undefined" # edge case when no attributes altogether.
                 @projectIds = []
             else # handles the empty attribute case with compact
                 @projectIds = _.compact(@sfdcProjectId.split(','))
+            Polymer.flush()
 
         # TODO: Some placeholder for how this could work:
         # For now leave this off by not honoring this as a public attribute in call-log.html
@@ -36,12 +54,14 @@ Attributes and Change Handlers
             alert 'Not yet fully implemented'
             unless @projectIds
                 @projectIds = _.compact(@vegaProjectId.split(','))
+            Polymer.flush()
 
         projectIdsChanged: () ->
             @projects = []
             if (@projectIds).length > 0
                 @projectIdsCSV = encodeURIComponent @projectIds.join(',')
             @reset()
+            Polymer.flush()
 
         ajaxProjectsResponseChanged: () ->
             @projects = @ajaxProjectsResponse
@@ -49,6 +69,7 @@ Attributes and Change Handlers
                 project = _.extend project,
                     type: @projectType
             @projectsLoaded = true
+            Polymer.flush()
 
         # Custom checkbox behavior to ensure only one selected.
         # Unfortunately this is not a radio button per se,
@@ -59,11 +80,13 @@ Attributes and Change Handlers
                 contactCheckbox.checked = false unless contactCheckbox.value == newVal?.salesforceId
 
             @$.ajaxContactInfo.url = if newVal then "#{@sfApiServer}/api/contact/sf/#{newVal.salesforceId}" else ""
+            Polymer.flush()
 
         # TODO: Rename the callTypes to outcome to normalize and make clear.
         callTypeSelectedChanged: (oldVal, newVal) ->
             if (newVal == null)
                 @resetCallTypeSelected()
+            Polymer.flush()
 
         sfApiServerChanged: () ->
             that = @
@@ -75,6 +98,7 @@ Attributes and Change Handlers
                     that.selections = _.find(@response.fields, {
                         name: 'call_outcome__c'
                     }).picklistValues
+                    Polymer.flush()
 
             @$.ajaxContactInfo.addEventListener 'core-response', (e) ->
 
@@ -113,9 +137,11 @@ Attributes and Change Handlers
                             ccListToDisplay[current.Id].roles = _.union ccListToDisplay[current.Id].roles, [cleanRole(e)]
 
                     that.ccListToDisplay.push value for key, value of ccListToDisplay
+                    Polymer.flush()
 
             @$.ajaxSubmit.addEventListener 'core-response', (e) ->
                 that.close()
+                Polymer.flush()
 
 ##Methods
 
@@ -128,32 +154,39 @@ Attributes and Change Handlers
             @callTypeSelected = null # This is a pretty crazy code smell...
             @subject = "Call Log"
             @$.subject.focus()
+            Polymer.flush()
 
         resetProjectsSelected: () -> # TODO: This is really singular for now (1 project)
             for projectCheckbox in @$.callLogContainer.querySelectorAll "input[name='project']"
                 projectCheckbox.checked = false
+            Polymer.flush()
 
         resetCallTypeSelected: () ->
             for callTypeRadio in @$.callLogContainer.querySelectorAll "input[name='callType']"
                 callTypeRadio.checked = false
+            Polymer.flush()
 
         clearErrors: () ->
             fields = @$.callLogContainer.getElementsByClassName 'field'
             [].forEach.call fields, (field, index, array) ->
                 field.classList.remove 'error'
             @errors = []
+            Polymer.flush()
 
         resetCCList: () ->
             @ccListToDisplay = []
+            Polymer.flush()
 
 ##Event Handlers
 
         close: (event, detail, sender) ->
             @reset()
             @fire 'call-log-cancel', {}
+            Polymer.flush()
 
         selectCallType: (event, detail, sender) ->
             @callTypeSelected = sender.value
+            Polymer.flush()
 
         selectContact: (event, detail, sender) ->
             contact = event.target.templateInstance.model.c
@@ -162,6 +195,7 @@ Attributes and Change Handlers
                 @contactSelected = null
             else
                 @contactSelected = contact
+            Polymer.flush()
 
         selectAssociatedProject: (event, detail, sender) ->
             project = event.target.templateInstance.model.project
@@ -170,9 +204,11 @@ Attributes and Change Handlers
             # maybe, what I can do is change the approach to instead of resetting..
             # fire off a rebuild of the cc list either from here in order to
             # ensure reading all of the proper cc's (contact and projects)
+            Polymer.flush()
 
         ajaxProjectsError: (event, response) ->
             @projectIds = []
+            Polymer.flush()
 
         submit: (event, detail, sender) ->
             getSelectedInputs = (name) => # (Helper)
@@ -216,6 +252,7 @@ Attributes and Change Handlers
 
             # Silent ignore (just truncate don't throw an error!):
             results.cc_list__c = results.cc_list__c.substring(0, 255)
+            Polymer.flush()
 
             if (!@errors.length)
                 # 1. Save Task
@@ -223,6 +260,7 @@ Attributes and Change Handlers
                     ajaxSubmit = @$.ajaxSubmit
                     ajaxSubmit.body = JSON.stringify results
                     ajaxSubmit.go()
+                    Polymer.flush()
                 else # projects selected
                     for project in sfdcProjectsSelected
                         results.WhatId = project
@@ -230,6 +268,7 @@ Attributes and Change Handlers
                         ajaxSubmit = @$.ajaxSubmit
                         ajaxSubmit.body = JSON.stringify results
                         ajaxSubmit.go()
+                        Polymer.flush()
 
                 # 2. Send CC emails
                 if (not _.isEmpty ccListSelected)
@@ -249,6 +288,7 @@ Attributes and Change Handlers
                         # relatedProjectId:
                         # relatedProjectName:
                     ajaxCC.go()
+                    Polymer.flush()
 
 ##Polymer Lifecycle
 
