@@ -93,7 +93,11 @@
                 </template>
                 <template repeat="{{s in selections}}">
                     <label for="{{s.value}}" class="selection-label" />
-                    <input id="{{s.value}}" style="margin-right: 2px;" type="radio" name="callType" value="{{s.value}}" on-click="{{selectCallType}}"></input>
+                    <input id="{{s.value}}" style="margin-right: 2px;"
+                        type="radio"
+                        name="callType"
+                        value="{{s.value}}"
+                        on-click="{{selectCallType}}"></input>
                     {{s.label}}
                 </template>
             </div>

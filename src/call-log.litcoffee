@@ -72,7 +72,9 @@ Attributes and Change Handlers
                     that.errors.push "Can't conect to salesforce api server."
                 else
                     that.selectionsLoaded = true
-                    that.selections = _.find(@response.fields, {name: 'call_outcome__c'}).picklistValues
+                    that.selections = _.find(@response.fields, {
+                        name: 'call_outcome__c'
+                    }).picklistValues
 
             @$.ajaxContactInfo.addEventListener 'core-response', (e) ->
 
