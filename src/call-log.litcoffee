@@ -30,7 +30,7 @@ but performance concerns or zombie/memory isues with setInterval make it not wor
 
     Polymer 'call-log',
 
-##Events
+## Events
 
 Attributes and Change Handlers
 
@@ -143,7 +143,7 @@ Attributes and Change Handlers
                 that.close()
                 Polymer.flush()
 
-##Methods
+## Methods
 
         reset: () ->
             @clearErrors()
@@ -177,7 +177,7 @@ Attributes and Change Handlers
             @ccListToDisplay = []
             Polymer.flush()
 
-##Event Handlers
+## Event Handlers
 
         close: (event, detail, sender) ->
             @reset()
@@ -290,7 +290,7 @@ Attributes and Change Handlers
                     ajaxCC.go()
                     Polymer.flush()
 
-##Polymer Lifecycle
+## Polymer Lifecycle
 
         created: () ->
             @selections = []
